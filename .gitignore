@@ -1,0 +1,13 @@
+*.exe
+.cursor
+.vscode/
+.idea/
+
+tinder-server
+bin/
+
+*.out
+*.prof
+
+.DS_Store
+Thumbs.db
