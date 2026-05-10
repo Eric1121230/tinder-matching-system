@@ -50,6 +50,14 @@ Repository 層將資料預先拆分為 `males` 與 `females` 兩個獨立 Map。
 | **查詢所有成員** | `GET /api/v1/people` | `handleQuerySinglePeople` | O(S log S) | 全量資料提取 O(S) 並進行穩定排序。 |
 
 ## 5. 待優化事項 (TBD)
-- **唯一識別碼優化**：預計改用 **UUID/ULID** 作為內部 Primary Key，解決 `name` 同名衝突問題。
-- **搜尋索引優化**：計畫建立 **配對權重機制**。
-- **分頁處理**：為查詢 API 增加 `limit/offset` 支援，避免大數據量下單次傳輸 Payload 過大。
+
+- **唯一值設計優化**: 
+  - 目前以 `name` 作為唯一鍵（Primary Key）不符合現實場景（同名問題）。
+  - 計畫改用 **UUID** 或 **ULID** 作為內部唯一識別碼，提升資料可靠性與隱私保護。
+- **分頁處理**: 
+  - 為 `QuerySinglePeople` 增加 `limit` 與 `offset` (或 Cursor-based) 分頁支援，避免大數據量下單次 Response 過大。
+- **搜尋索引優化**: 
+  - 建立 **多維度配對權重機制** (如地理位置、興趣標籤)，提升配對精準度。
+- **即時通知系統 (Real-time Notification)**:
+  - 實作 **WebSocket** 或 **SSE (Server-Sent Events)** 雙向/單向通訊機制。
+  - 當新使用者註冊並觸發配對時，系統能主動推播 (Push Notification) 給被配對到的在線使用者

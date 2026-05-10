@@ -96,4 +96,7 @@ go test -cover ./internal/gateway/...
 - **分頁處理**: 
   - 為 `QuerySinglePeople` 增加 `limit` 與 `offset` (或 Cursor-based) 分頁支援，避免大數據量下單次 Response 過大。
 - **搜尋索引優化**: 
-  - 計畫建立 配對權重機制
+  - 建立 **多維度配對權重機制** (如地理位置、興趣標籤)，提升配對精準度。
+- **即時通知系統 (Real-time Notification)**:
+  - 實作 **WebSocket** 或 **SSE (Server-Sent Events)** 雙向/單向通訊機制。
+  - 當新使用者註冊並觸發配對時，系統能主動推播 (Push Notification) 給被配對到的在線使用者
