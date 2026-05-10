@@ -310,4 +310,25 @@ func TestGateway_handleQueryPersonMatches(t *testing.T) {
 			t.Errorf("找不到人應回傳 404, 得到 %d", w.Code)
 		}
 	})
+	t.Run("Panic_Recovery_500", func(t *testing.T) {
+		gw := setup()
+		gw.mux.HandleFunc("GET /api/v1/panic", func(w http.ResponseWriter, r *http.Request) {
+			panic("simulated disaster")
+		})
+		server := gw.Handler()
+
+		req := httptest.NewRequest("GET", "/api/v1/panic", nil)
+		w := httptest.NewRecorder()
+
+		server.ServeHTTP(w, req)
+
+		if w.Code != http.StatusInternalServerError {
+			t.Errorf("expected 500, got %d", w.Code)
+		}
+
+		if !strings.Contains(w.Body.String(), "INTERNAL_SERVER_ERROR") {
+			t.Errorf("expected error body, got %s", w.Body.String())
+		}
+	})
+
 }
