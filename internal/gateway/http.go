@@ -47,9 +47,32 @@ func NewHTTPGateway(logger *slog.Logger, svc service.MatchingService) *HTTPGatew
 }
 
 func (g *HTTPGateway) Handler() http.Handler {
-	return g.loggingMiddleware(g.mux)
+	h := g.recoveryMiddleware(g.mux)
+
+	return g.loggingMiddleware(h)
 }
 
+func (g *HTTPGateway) recoveryMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		defer func() {
+			if err := recover(); err != nil {
+
+				g.logger.Error("panic_recovered",
+					"error", err,
+					"path", r.URL.Path,
+				)
+
+				w.Header().Set("Content-Type", "application/json")
+				w.WriteHeader(http.StatusInternalServerError)
+				_ = json.NewEncoder(w).Encode(map[string]string{
+					"error_code": "INTERNAL_SERVER_ERROR",
+					"message":    "系統發生非預期錯誤，已自動修復",
+				})
+			}
+		}()
+		next.ServeHTTP(w, r)
+	})
+}
 func (g *HTTPGateway) loggingMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		start := time.Now()
