@@ -60,7 +60,7 @@ go test -cover ./internal/gateway/...
 
 ## API 概覽
 
-詳細資訊請參考 [API Documentation](./docs/api.md)。
+詳細資訊請參考 [API Documentation](./docs/API.md)。
 
 
 | 方法 | 路徑 | 功能 |
@@ -69,21 +69,22 @@ go test -cover ./internal/gateway/...
 | `DELETE` | `/api/v1/people/{name}` | 從系統中移除特定成員 |
 | `GET` | `/api/v1/people` | 列出所有目前單身成員 (姓名排序) |
 | `GET` | `/api/v1/people/{name}` | 查詢特定人員詳細資料 |
-| `GET` | `/api/v1/people/{name}/matches` | 查詢符合該人員條件的 Top N 候選人 |
+| `GET` | `/api/v1/people/{name}/matches?top={N}` | 查詢符合該人員條件的 Top N 候選人 |
 
 ---
 
 ## 效能複雜度分析
 
 
-| API 功能 | 時間複雜度 | 效能關鍵 |
-| :--- | :--- | :--- |
-| **新增並配對** | $O(S_{opp})$ | 異性池一趟掃描 (Single Pass) |
-| **移除人員** | $O(1)$ | 分區 Map 雜湊檢索 |
-| **查詢配對名單** | $O(S_{opp} + K \log K)$ | 篩選 $S_{opp}$ 後針對結果 $K$ 排序 |
-| **查詢所有成員** | $O(S \log S)$ | 全量成員合併與穩定排序 |
+| API 功能 | URL | API Name | 複雜度 | 說明 |
+| :--- | :--- | :--- | :--- | :--- |
+| **新增並配對** | `POST /api/v1/people/match` | `handleAddSinglePersonAndMatch` | O(S_opp) | 包含 O(1) 唯一性檢查與異性池一趟掃描 (Single Pass)。 |
+| **移除人員** | `DELETE /api/v1/people/{name}` | `handleRemoveSinglePerson` | O(1) | 分區 Map 雜湊檢索，常數時間定位。 |
+| **查詢配對名單** | `GET /api/v1/people/{name}/matches` | `handleQueryPersonMatches` | O(S_opp + K log K) | 異性池篩選 O(S_opp) 與結果排序 O(K log K)。 |
+| **查詢單一成員** | `GET /api/v1/people/{name}` | `handleQuerySinglePerson` | O(1) | 透過名稱雜湊直接檢索。 |
+| **查詢所有成員** | `GET /api/v1/people` | `handleQuerySinglePeople` | O(S log S) | 全量資料提取 O(S) 並進行穩定排序。 |
 
-*詳細設計邏輯與複雜度推導請參閱 [System Design](./docs/design.md)。*
+*詳細設計邏輯與複雜度推導請參閱 [System Design](./docs/DESIGN.md)。*
 
 ---
 
