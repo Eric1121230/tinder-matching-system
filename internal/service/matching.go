@@ -42,7 +42,7 @@ func (s *matchingService) AddSinglePersonAndMatch(person model.Person) ([]model.
 			continue
 		}
 
-		updatedOther, success := s.repo.RedeemWantedDates(otherSnapshot.Name)
+		updatedOther, success := s.repo.RedeemWantedDates(otherSnapshot.Name, oppositeGender)
 		if !success {
 			continue
 		}

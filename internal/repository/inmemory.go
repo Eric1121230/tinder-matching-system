@@ -32,24 +32,16 @@ func (r *InMemoryPersonRepository) Upsert(person model.Person) {
 		r.females[person.Name] = person
 	}
 }
-func (r *InMemoryPersonRepository) RedeemWantedDates(name string) (model.Person, bool) {
+func (r *InMemoryPersonRepository) RedeemWantedDates(name string, gender model.Gender) (model.Person, bool) {
 	var mu *sync.RWMutex
 	var pool map[string]model.Person
 
-	r.maleMu.RLock()
-	if _, ok := r.males[name]; ok {
-		r.maleMu.RUnlock()
+	if gender == model.GenderMale {
 		mu, pool = &r.maleMu, r.males
+	} else if gender == "female" {
+		mu, pool = &r.femaleMu, r.females
 	} else {
-		r.maleMu.RUnlock()
-		r.femaleMu.RLock()
-		if _, ok := r.females[name]; ok {
-			r.femaleMu.RUnlock()
-			mu, pool = &r.femaleMu, r.females
-		} else {
-			r.femaleMu.RUnlock()
-			return model.Person{}, false
-		}
+		return model.Person{}, false
 	}
 
 	mu.Lock()

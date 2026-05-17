@@ -8,5 +8,5 @@ type PersonRepository interface {
 	GetByName(name string) (model.Person, bool)
 	ListAll() []model.Person
 	ListByGender(gender model.Gender) []model.Person
-	RedeemWantedDates(name string) (model.Person, bool)
+	RedeemWantedDates(name string, gender model.Gender) (model.Person, bool)
 }
